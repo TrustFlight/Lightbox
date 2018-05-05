@@ -16,6 +16,11 @@ public protocol LightboxControllerTouchDelegate: class {
   func lightboxController(_ controller: LightboxController, didTouch image: LightboxImage, at index: Int)
 }
 
+public protocol LightboxControllerDeleteDelegate: class {
+
+    func lightboxController(_ controller: LightboxController, didDeleteImageAt index: Int)
+}
+
 open class LightboxController: UIViewController {
 
   // MARK: - Internal views
@@ -140,6 +145,7 @@ open class LightboxController: UIViewController {
   open weak var pageDelegate: LightboxControllerPageDelegate?
   open weak var dismissalDelegate: LightboxControllerDismissalDelegate?
   open weak var imageTouchDelegate: LightboxControllerTouchDelegate?
+  open weak var imageDeleteDelegate: LightboxControllerDeleteDelegate?
   open internal(set) var presented = false
   open fileprivate(set) var seen = false
 
@@ -421,32 +427,38 @@ extension LightboxController: PageViewDelegate {
 extension LightboxController: HeaderViewDelegate {
 
   func headerView(_ headerView: HeaderView, didPressDeleteButton deleteButton: UIButton) {
-    deleteButton.isEnabled = false
 
-    initialImages.remove(at: currentPage)
+    let alert = UIAlertController(title: "Delete Image", message: "Would you like to delete the selected image?", preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: "Default action"), style: .`default`, handler: { _ in NSLog("The \"OK\" alert occured.")}))
+    alert.addAction(UIAlertAction(title: NSLocalizedString("Delete", comment: "Confirm delete"), style: .`default`, handler: { _ in
+        deleteButton.isEnabled = false
 
-    guard numberOfPages != 1 else {
-      pageViews.removeAll()
-      self.headerView(headerView, didPressCloseButton: headerView.closeButton)
-      return
-    }
+        guard self.numberOfPages != 1 else {
+            self.pageViews.removeAll()
+            self.headerView(headerView, didPressCloseButton: headerView.closeButton)
+            return
+        }
 
-    let prevIndex = currentPage
+        self.initialImages.remove(at: self.currentPage)
+        let prevIndex = self.currentPage
 
-    if currentPage == numberOfPages - 1 {
-      previous()
-    } else {
-      next()
-      currentPage -= 1
-    }
+        if self.currentPage == self.numberOfPages - 1 {
+            self.previous()
+        } else {
+            self.next()
+            self.currentPage -= 1
+        }
 
-    self.pageViews.remove(at: prevIndex).removeFromSuperview()
+        self.pageViews.remove(at: prevIndex).removeFromSuperview()
 
-    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
-      self.configureLayout(self.view.bounds.size)
-      self.currentPage = Int(self.scrollView.contentOffset.x / self.view.bounds.width)
-      deleteButton.isEnabled = true
-    }
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
+            self.configureLayout(self.view.bounds.size)
+            self.currentPage = Int(self.scrollView.contentOffset.x / self.view.bounds.width)
+            deleteButton.isEnabled = true
+            self.imageDeleteDelegate?.lightboxController(self, didDeleteImageAt: prevIndex)
+        }
+    }))
+    present(alert, animated: true, completion: nil)
   }
 
   func headerView(_ headerView: HeaderView, didPressCloseButton closeButton: UIButton) {

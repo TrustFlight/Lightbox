@@ -423,6 +423,8 @@ extension LightboxController: HeaderViewDelegate {
   func headerView(_ headerView: HeaderView, didPressDeleteButton deleteButton: UIButton) {
     deleteButton.isEnabled = false
 
+    initialImages.remove(at: currentPage)
+
     guard numberOfPages != 1 else {
       pageViews.removeAll()
       self.headerView(headerView, didPressCloseButton: headerView.closeButton)

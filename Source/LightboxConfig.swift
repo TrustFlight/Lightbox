@@ -21,8 +21,20 @@ public class LightboxConfig {
   /// How to load image onto UIImageView
   public static var loadImage: (UIImageView, URL, ((UIImage?) -> Void)?) -> Void = { (imageView, imageURL, completion) in
 
+    var option = Option()
+    option.downloaderMaker = {
+        return ImageDownloader(modifyRequest: {
+            var request = $0
+            request.setValue(UserDefaults.standard.object(forKey: "authToken")! as? String, forHTTPHeaderField: "auth")
+            request.setValue("iOS-TechLog", forHTTPHeaderField: "client")
+            request.setValue((Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String), forHTTPHeaderField: "client-version")
+            request.setValue(Bundle.main.infoDictionary?["CFBundleVersion"] as? String, forHTTPHeaderField: "client-build")
+            return request
+        })
+    }
+
     // Use Imaginary by default
-    imageView.setImage(url: imageURL, placeholder: nil, completion: { result in
+    imageView.setImage(url: imageURL, placeholder: nil, option:option, completion: { result in
       switch result {
       case .value(let image):
         completion?(image)

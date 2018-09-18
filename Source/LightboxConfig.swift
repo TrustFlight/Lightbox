@@ -25,10 +25,12 @@ public class LightboxConfig {
     option.downloaderMaker = {
         return ImageDownloader(modifyRequest: {
             var request = $0
-            request.setValue(UserDefaults.standard.object(forKey: "authToken")! as? String, forHTTPHeaderField: "auth")
-            request.setValue("iOS-TechLog", forHTTPHeaderField: "client")
-            request.setValue((Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String), forHTTPHeaderField: "client-version")
-            request.setValue(Bundle.main.infoDictionary?["CFBundleVersion"] as? String, forHTTPHeaderField: "client-build")
+            if let auth = UserDefaults.standard.object(forKey: "authToken")! as? String {
+                request.setValue("Bearer \(auth)", forHTTPHeaderField: "Authorization")
+                request.setValue("iOS-TechLog", forHTTPHeaderField: "client")
+                request.setValue((Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String), forHTTPHeaderField: "client-version")
+                request.setValue(Bundle.main.infoDictionary?["CFBundleVersion"] as? String, forHTTPHeaderField: "client-build")
+            }
             return request
         })
     }

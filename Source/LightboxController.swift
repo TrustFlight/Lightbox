@@ -470,7 +470,11 @@ extension LightboxController: HeaderViewDelegate {
   }
 
     func headerView(_ headerView: HeaderView, didPressShareButton shareButton: UIButton) {
-        if let image = pageViews[currentPage].imageView.image {
+        if let videoUrl = images[currentPage].videoURL {
+            let controller = UIActivityViewController(activityItems: [videoUrl], applicationActivities: nil)
+            controller.popoverPresentationController?.sourceView = shareButton
+            present(controller, animated: true, completion: nil)
+        } else if let image = pageViews[currentPage].imageView.image {
             let controller = UIActivityViewController(activityItems: [image], applicationActivities: nil)
             controller.popoverPresentationController?.sourceView = shareButton
             present(controller, animated: true, completion: nil)

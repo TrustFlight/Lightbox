@@ -3,6 +3,7 @@ import UIKit
 protocol HeaderViewDelegate: class {
   func headerView(_ headerView: HeaderView, didPressDeleteButton deleteButton: UIButton)
   func headerView(_ headerView: HeaderView, didPressCloseButton closeButton: UIButton)
+  func headerView(_ headerView: HeaderView, didPressShareButton closeButton: UIButton)
 }
 
 open class HeaderView: UIView {
@@ -60,6 +61,33 @@ open class HeaderView: UIView {
     return button
   }()
 
+    open fileprivate(set) lazy var shareButton: UIButton = { [unowned self] in
+        let title = NSAttributedString(
+            string: LightboxConfig.ShareButton.text,
+            attributes: LightboxConfig.ShareButton.textAttributes)
+
+        let button = UIButton(type: .system)
+
+        button.setAttributedTitle(title, for: .normal)
+
+        if let size = LightboxConfig.ShareButton.size {
+            button.frame.size = size
+        } else {
+            button.sizeToFit()
+        }
+
+        button.addTarget(self, action: #selector(shareButtonDidPress(_:)),
+                         for: .touchUpInside)
+
+        if let image = LightboxConfig.ShareButton.image {
+            button.setBackgroundImage(image, for: UIControlState())
+        }
+
+        button.isHidden = !LightboxConfig.ShareButton.enabled
+
+        return button
+        }()
+
   weak var delegate: HeaderViewDelegate?
 
   // MARK: - Initializers
@@ -69,7 +97,7 @@ open class HeaderView: UIView {
 
     backgroundColor = UIColor.clear
 
-    [closeButton, deleteButton].forEach { addSubview($0) }
+    [closeButton, deleteButton, shareButton].forEach { addSubview($0) }
   }
 
   public required init?(coder aDecoder: NSCoder) {
@@ -85,6 +113,10 @@ open class HeaderView: UIView {
   @objc func closeButtonDidPress(_ button: UIButton) {
     delegate?.headerView(self, didPressCloseButton: button)
   }
+
+    @objc func shareButtonDidPress(_ button: UIButton) {
+        delegate?.headerView(self, didPressShareButton: button)
+    }
 }
 
 // MARK: - LayoutConfigurable
@@ -103,6 +135,11 @@ extension HeaderView: LayoutConfigurable {
     closeButton.frame.origin = CGPoint(
       x: bounds.width - closeButton.frame.width - 17,
       y: topPadding
+    )
+
+    shareButton.frame.origin = CGPoint(
+        x: bounds.width - (closeButton.frame.width + 17) * 2,
+        y: topPadding
     )
 
     deleteButton.frame.origin = CGPoint(

@@ -105,6 +105,23 @@ public class LightboxConfig {
     ]
   }
 
+    public struct ShareButton {
+        public static var enabled = false
+        public static var size: CGSize?
+        public static var text = NSLocalizedString("Share", comment: "")
+        public static var image: UIImage?
+
+        public static var textAttributes: [NSAttributedStringKey: Any] = [
+            .font: UIFont.boldSystemFont(ofSize: 16),
+            .foregroundColor: UIColor.white,
+            .paragraphStyle: {
+                var style = NSMutableParagraphStyle()
+                style.alignment = .center
+                return style
+            }()
+        ]
+    }
+
   public struct InfoLabel {
     public static var enabled = true
     public static var textColor = UIColor.white

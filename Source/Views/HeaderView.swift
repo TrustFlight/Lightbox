@@ -114,9 +114,9 @@ open class HeaderView: UIView {
     delegate?.headerView(self, didPressCloseButton: button)
   }
 
-    @objc func shareButtonDidPress(_ button: UIButton) {
-        delegate?.headerView(self, didPressShareButton: button)
-    }
+  @objc func shareButtonDidPress(_ button: UIButton) {
+    delegate?.headerView(self, didPressShareButton: button)
+  }
 }
 
 // MARK: - LayoutConfigurable
@@ -131,7 +131,15 @@ extension HeaderView: LayoutConfigurable {
     } else {
       topPadding = 0
     }
-
+    
+    [closeButton, deleteButton, shareButton].forEach {
+        $0.titleLabel?.layer.shadowRadius = 3
+        $0.titleLabel?.layer.shadowColor = UIColor.black.cgColor
+        $0.titleLabel?.layer.shadowOffset = CGSize(width: 0, height: 1)
+        $0.titleLabel?.layer.shadowOpacity = 0.5
+        $0.titleLabel?.layer.masksToBounds = false
+    }
+    
     closeButton.frame.origin = CGPoint(
       x: bounds.width - closeButton.frame.width - 17,
       y: topPadding
